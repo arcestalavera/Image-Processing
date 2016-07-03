@@ -42,16 +42,16 @@ public class ImageProcessing {
             
             l.whou();
             
-            l.PeelLayer();
-            l.PeelLayer();
-            l.PeelLayer();
-            l.PeelLayer();
-            l.PeelLayer();
-            l.PeelLayer();
-            l.PeelLayer();
+            ArrayList<BufferedImage> images = l.extract(7, 5);
+           
+            int num=0;
+            for(BufferedImage img2: images){
+                ImageIO.write(img2, "jpg", new File("saved "+num+".jpg"));
+                num++;
+            }
             
-            BufferedImage img2 = l.getImage();
-            ImageIO.write(img2, "jpg", outputfile);
+          
+            
             
         }catch(Exception e){
             System.out.println(e.toString());

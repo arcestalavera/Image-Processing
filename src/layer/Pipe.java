@@ -38,7 +38,7 @@ public class Pipe {
     }
     
     public void whatami(){
-        if(greyValueSum /total  > 100){
+        if(greyValueSum /total  > 127){
             System.out.println("Queue "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total );
             //list.remove(0);
         }else{
@@ -53,7 +53,7 @@ public class Pipe {
         
         int pixel;
         
-        if(greyValueSum/total > 100){
+        if(greyValueSum/total > 127){
             pixel = list.get(0);
             list.remove(0);
         }else{
