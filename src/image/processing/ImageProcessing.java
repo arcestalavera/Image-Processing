@@ -14,25 +14,52 @@ import layer.Layer;
 public class ImageProcessing {
     public static void main(String[] args) {
        // new ImageView();
-        Layer l  = new Layer(250,250);
+        Layer l  = new Layer(200,200);
         BufferedImage img = null;
+        File outputfile = new File("saved.jpg");
+   
+        
+        
         try{
-            img = ImageIO.read(new File("bicol.jpg"));
+            img = ImageIO.read(new File("pic1 (1).jpg"));
              l.addImage(img);
-            img = ImageIO.read(new File("dory.jpg"));
+            img = ImageIO.read(new File("pic1 (2).jpg"));
              l.addImage(img);
-            img = ImageIO.read(new File("palawan.jpg"));
+            img = ImageIO.read(new File("pic1 (3).jpg"));
              l.addImage(img);
-            img = ImageIO.read(new File("whiteflower.jpg"));
+            img = ImageIO.read(new File("pic1 (4).jpg"));
+            l.addImage(img);
+            img = ImageIO.read(new File("pic1 (5).jpg"));
             l.addImage(img);
             
+            img = ImageIO.read(new File("pic1 (6).jpg"));
+            l.addImage(img);
             
+            img = ImageIO.read(new File("pic1 (7).jpg"));
+            l.addImage(img);
+            img = ImageIO.read(new File("pic1 (8).jpg"));
+            l.addImage(img);
+            
+            l.whou();
+            
+            l.PeelLayer();
+            l.PeelLayer();
+            l.PeelLayer();
+            l.PeelLayer();
+            l.PeelLayer();
+            l.PeelLayer();
+            l.PeelLayer();
+            
+            BufferedImage img2 = l.getImage();
+            ImageIO.write(img2, "jpg", outputfile);
             
         }catch(Exception e){
-            
+            System.out.println(e.toString());
+            e.printStackTrace();
+            //System.out.println("Here");
         }
         
-        
+   
         
     }
 }

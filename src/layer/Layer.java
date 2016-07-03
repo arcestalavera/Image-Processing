@@ -26,8 +26,22 @@ public class Layer {
         
     }
     
-    public void getImage(){
+    public BufferedImage getImage(){
+        int h = pipes.length;
+        int w = pipes[0].length;
         
+    BufferedImage img = new BufferedImage(w, h,BufferedImage.TYPE_INT_RGB);
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                //System.out.println("x,y: " + i + ", " + j);
+                //int pixel = image.getRGB(i, j);
+                img.setRGB(i, j, pipes[j][i].getTop());
+                
+                //imagePixels[i][j] = pixel;
+                
+            }
+        }
+        return img;
     }
     
     public void PeelLayer(){
@@ -45,6 +59,27 @@ public class Layer {
             }
         }
     }
+    
+    
+    
+    public void whou(){
+        
+        int h = pipes.length;
+        int w = pipes[0].length;
+        
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                //System.out.println("x,y: " + i + ", " + j);
+                //int pixel = image.getRGB(i, j);
+                //System.out.println("j "+j+" : "+i);
+                pipes[j][i].whatami();
+                //imagePixels[i][j] = pixel;
+                
+            }
+        }
+    }
+    
+    
     
     
     public void addImage(BufferedImage image){

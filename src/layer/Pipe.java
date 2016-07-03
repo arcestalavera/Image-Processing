@@ -37,8 +37,21 @@ public class Pipe {
         return list.get(list.size()-1);
     }
     
+    public void whatami(){
+        if(greyValueSum  > 100){
+            System.out.println("Queue "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total );
+            //list.remove(0);
+        }else{
+            System.out.println("Stack "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total);
+        }
+    }
+    
+    
+    
+    
     public void peel(){
-        if(greyValueSum / total > 100){
+        if(greyValueSum > 100){
+          
             list.remove(0);
         }else{
             list.remove(list.size()-1);
