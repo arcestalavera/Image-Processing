@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.DefaultFormatter;
+import layer.Layer;
 
 /**
  *
@@ -33,23 +34,28 @@ import javax.swing.text.DefaultFormatter;
  */
 public class ImageView extends javax.swing.JFrame {
 
-    private BufferedImage image, displayImage;
-    private int[][] imagePixels;
+    private BufferedImage displayImage;
+    private Layer layer;
     private JFileChooser jfc;
-    private JFormattedTextField xTextField, yTextField, widthTextField, heightTextField;
-    private JComponent xComp, yComp, widthComp, heightComp;
+    private JFormattedTextField xTextField, yTextField, widthTextField, heightTextField, kTextField, mTextField;
+    private JComponent xComp, yComp, widthComp, heightComp, kComp, mComp;
+    private ArrayList<BufferedImage> convolvedImages;
 
     public ImageView() {
+        layer = new Layer(720, 720);
+        convolvedImages = new ArrayList<>();
+
         initComponents();
 
         this.setLocationRelativeTo(null);
         this.add(imagePanel);
         this.setVisible(true);
         jfc = new JFileChooser();
-        FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("PNG file", "png");
+        FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("JPG file", "jpg");
         FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("CSV file", "csv");
         jfc.addChoosableFileFilter(jpgFilter);
         jfc.addChoosableFileFilter(csvFilter);
+        jfc.setMultiSelectionEnabled(true);
 
         xComp = cropXSpinner.getEditor();
         xTextField = (JFormattedTextField) xComp.getComponent(0);
@@ -60,17 +66,26 @@ public class ImageView extends javax.swing.JFrame {
         yTextField = (JFormattedTextField) yComp.getComponent(0);
         DefaultFormatter yFormatter = (DefaultFormatter) yTextField.getFormatter();
         yFormatter.setCommitsOnValidEdit(true);
-        
+
         widthComp = cropWidthSpinner.getEditor();
         widthTextField = (JFormattedTextField) widthComp.getComponent(0);
         DefaultFormatter widthFormatter = (DefaultFormatter) widthTextField.getFormatter();
         widthFormatter.setCommitsOnValidEdit(true);
-        
+
         heightComp = cropHeightSpinner.getEditor();
         heightTextField = (JFormattedTextField) heightComp.getComponent(0);
         DefaultFormatter heightFormatter = (DefaultFormatter) heightTextField.getFormatter();
         heightFormatter.setCommitsOnValidEdit(true);
-        
+
+        mComp = convolveMSpinner.getEditor();
+        mTextField = (JFormattedTextField) mComp.getComponent(0);
+        DefaultFormatter mFormatter = (DefaultFormatter) mTextField.getFormatter();
+        mFormatter.setCommitsOnValidEdit(true);
+
+        kComp = convolveKSpinner.getEditor();
+        kTextField = (JFormattedTextField) kComp.getComponent(0);
+        DefaultFormatter kFormatter = (DefaultFormatter) kTextField.getFormatter();
+        kFormatter.setCommitsOnValidEdit(true);
     }
 
     /**
@@ -84,6 +99,7 @@ public class ImageView extends javax.swing.JFrame {
 
         imagePanel = new javax.swing.JScrollPane();
         imageLabel = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
         actionPanel = new javax.swing.JPanel();
         loadImageBtn = new javax.swing.JButton();
         saveImageBtn = new javax.swing.JButton();
@@ -111,6 +127,12 @@ public class ImageView extends javax.swing.JFrame {
         darkenSlider = new javax.swing.JSlider();
         darkenBtn = new javax.swing.JButton();
         zoomBtn = new javax.swing.JButton();
+        peelBtn = new javax.swing.JButton();
+        peelLabel = new javax.swing.JLabel();
+        convolveKSpinner = new javax.swing.JSpinner();
+        convolveKLabel = new javax.swing.JLabel();
+        convolveMSpinner = new javax.swing.JSpinner();
+        convolveMLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Image Manipulation App");
@@ -314,92 +336,129 @@ public class ImageView extends javax.swing.JFrame {
             }
         });
 
+        peelBtn.setBackground(new java.awt.Color(236, 236, 245));
+        peelBtn.setFont(new java.awt.Font("Century Gothic", 0, 11)); // NOI18N
+        peelBtn.setText("Peel Image");
+        peelBtn.setEnabled(false);
+        peelBtn.setFocusable(false);
+        peelBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                peelBtnActionPerformed(evt);
+            }
+        });
+
+        peelLabel.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        peelLabel.setText("Convolve Images");
+        peelLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        convolveKSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
+        convolveKSpinner.setEnabled(false);
+
+        convolveKLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
+        convolveKLabel.setText("k");
+        convolveKLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        convolveMSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
+        convolveMSpinner.setEnabled(false);
+
+        convolveMLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
+        convolveMLabel.setText("m");
+        convolveMLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout actionPanelLayout = new javax.swing.GroupLayout(actionPanel);
         actionPanel.setLayout(actionPanelLayout);
         actionPanelLayout.setHorizontalGroup(
             actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(actionPanelLayout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addComponent(zoomLabel)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(actionPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(actionPanelLayout.createSequentialGroup()
                         .addGap(33, 33, 33)
-                        .addComponent(alterLabel)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
-                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(reverseBtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(noiseSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(zoomLabel)
+                            .addComponent(alterLabel))
+                        .addGap(59, 59, 59))
+                    .addGroup(actionPanelLayout.createSequentialGroup()
+                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(peelBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cropImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(loadImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(reverseBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(noiseSlider, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(noiseBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(brightenSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(brightenBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(darkenSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(darkenBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
+                                .addComponent(zoomBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(zoomCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(actionPanelLayout.createSequentialGroup()
+                                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                        .addGap(40, 40, 40)
+                                        .addComponent(cropXLabel)
+                                        .addGap(52, 52, 52)
+                                        .addComponent(cropYLabel))
+                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                        .addGap(30, 30, 30)
+                                        .addComponent(rotateLabel))
+                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                        .addGap(34, 34, 34)
+                                        .addComponent(cropLabel))
+                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                        .addGap(25, 25, 25)
+                                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(actionPanelLayout.createSequentialGroup()
+                                                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(cropWidthSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                                        .addGap(10, 10, 10)
+                                                        .addComponent(cropWidthLabel)))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(cropHeightSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addGroup(actionPanelLayout.createSequentialGroup()
+                                                        .addGap(10, 10, 10)
+                                                        .addComponent(cropHeightLabel))))
+                                            .addGroup(actionPanelLayout.createSequentialGroup()
+                                                .addComponent(cropXSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(cropYSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(actionPanelLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(rotateCounterClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(rotateClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(8, 8, 8)))
                         .addContainerGap())))
             .addGroup(actionPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(37, 37, 37)
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(peelLabel)
                     .addGroup(actionPanelLayout.createSequentialGroup()
-                        .addComponent(cropImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
-                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cropWidthSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(cropWidthLabel)))
+                        .addGap(25, 25, 25)
+                        .addComponent(convolveKLabel)
+                        .addGap(50, 50, 50)
+                        .addComponent(convolveMLabel))
+                    .addGroup(actionPanelLayout.createSequentialGroup()
+                        .addGap(4, 4, 4)
+                        .addComponent(convolveKSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cropHeightSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addComponent(cropHeightLabel)))
-                        .addGap(31, 31, 31))
-                    .addGroup(actionPanelLayout.createSequentialGroup()
-                        .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addComponent(rotateCounterClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(rotateClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(40, 40, 40)
-                                .addComponent(cropXLabel)
-                                .addGap(52, 52, 52)
-                                .addComponent(cropYLabel))
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(30, 30, 30)
-                                .addComponent(rotateLabel))
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(34, 34, 34)
-                                .addComponent(cropLabel))
-                            .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(25, 25, 25)
-                                .addComponent(cropXSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cropYSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-            .addGroup(actionPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(loadImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(noiseBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(brightenSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(brightenBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(darkenSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(darkenBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, actionPanelLayout.createSequentialGroup()
-                        .addComponent(zoomBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(zoomCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addComponent(convolveMSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         actionPanelLayout.setVerticalGroup(
             actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(actionPanelLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addGap(20, 20, 20)
                 .addComponent(loadImageBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveImageBtn)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rotateLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -425,7 +484,7 @@ public class ImageView extends javax.swing.JFrame {
                     .addComponent(cropHeightLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cropImageBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(zoomLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -447,24 +506,39 @@ public class ImageView extends javax.swing.JFrame {
                 .addComponent(darkenSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addComponent(darkenBtn)
-                .addContainerGap())
+                .addGap(18, 18, 18)
+                .addComponent(peelLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(convolveKSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(convolveMSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(3, 3, 3)
+                .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(convolveKLabel)
+                    .addComponent(convolveMLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(peelBtn)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         rotateCounterClockwiseBtn.getAccessibleContext().setAccessibleName("Rotate Clockwise");
+
+        jScrollPane1.setViewportView(actionPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(actionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 748, Short.MAX_VALUE))
+                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 745, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(actionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 721, Short.MAX_VALUE)
+            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
 
         pack();
@@ -472,8 +546,7 @@ public class ImageView extends javax.swing.JFrame {
 
     private void loadImageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadImageBtnActionPerformed
         loadImage();
-        if (image != null) {
-            getImagePixels();
+        if (layer != null) {
             createImage();
 
             imageLabel.setIcon(new ImageIcon(displayImage));
@@ -495,19 +568,27 @@ public class ImageView extends javax.swing.JFrame {
             brightenBtn.setEnabled(true);
             darkenSlider.setEnabled(true);
             darkenBtn.setEnabled(true);
+            convolveKSpinner.setEnabled(true);
+            convolveMSpinner.setEnabled(true);
+            peelBtn.setEnabled(true);
 
             SpinnerNumberModel xCrop = (SpinnerNumberModel) cropXSpinner.getModel();
-            xCrop.setMaximum(image.getWidth());
+            xCrop.setMaximum(displayImage.getWidth());
 
             SpinnerNumberModel yCrop = (SpinnerNumberModel) cropYSpinner.getModel();
-            yCrop.setMaximum(image.getHeight());
+            yCrop.setMaximum(displayImage.getHeight());
 
             SpinnerNumberModel widthCrop = (SpinnerNumberModel) cropWidthSpinner.getModel();
-            widthCrop.setMaximum(image.getWidth());
+            widthCrop.setMaximum(displayImage.getWidth());
 
             SpinnerNumberModel heightCrop = (SpinnerNumberModel) cropHeightSpinner.getModel();
-            heightCrop.setMaximum(image.getHeight());
+            heightCrop.setMaximum(displayImage.getHeight());
 
+            SpinnerNumberModel kModel = (SpinnerNumberModel) convolveKSpinner.getModel();
+            kModel.setMaximum(layer.getPileSize());
+
+            SpinnerNumberModel mModel = (SpinnerNumberModel) convolveMSpinner.getModel();
+            mModel.setMaximum(displayImage.getHeight());
         }
     }//GEN-LAST:event_loadImageBtnActionPerformed
 
@@ -578,7 +659,7 @@ public class ImageView extends javax.swing.JFrame {
     }//GEN-LAST:event_darkenBtnActionPerformed
 
     private void zoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomBtnActionPerformed
-        displayImage = zoomImage();
+        displayImage = zoomImage("zoom");
         imageLabel.setIcon(new ImageIcon(new ImageIcon(displayImage).getImage().getScaledInstance(720, 720, Image.SCALE_SMOOTH)));
     }//GEN-LAST:event_zoomBtnActionPerformed
 
@@ -591,7 +672,7 @@ public class ImageView extends javax.swing.JFrame {
 
                 System.out.println("Saving " + extension + " file. . .");
                 switch (extension) {
-                    case "png":
+                    case "jpg":
                         ImageIO.write(displayImage, extension, jfc.getSelectedFile());
                         break;
                     case "csv":
@@ -606,52 +687,68 @@ public class ImageView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_saveImageBtnActionPerformed
 
-    public void loadImage() {
-        int val = jfc.showOpenDialog(this);
-        if (val == JFileChooser.APPROVE_OPTION) {
-            File imgFile = jfc.getSelectedFile();
+    private void peelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_peelBtnActionPerformed
+        int k = (Integer) convolveKSpinner.getValue();
+        int m = (Integer) convolveMSpinner.getValue();
+        int ctr = 1;
+        if (k != 0 && m != 0) {
+            convolvedImages = layer.extract(k, m);
+            displayImage = layer.getImage();
+            displayImage = zoomImage("convolve");
+            imageLabel.setIcon(new ImageIcon(displayImage));
 
-            if (imgFile != null) {
-                System.out.println("Selected file: " + imgFile.getAbsolutePath());
+            try {
+                for (BufferedImage img : convolvedImages) {
+                    createCSVFile("[CSV] Convolved Image " + ctr + ".csv");
+                    ImageIO.write(img, "jpg", new File("[JPG] Convolved Image " + ctr + ".jpg"));
 
-                try {
-                    this.image = ImageIO.read(imgFile);
-                } catch (IOException ex) {
-                    Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
+                    ctr++;
                 }
-
+            } catch (IOException ex) {
+                Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
+    }//GEN-LAST:event_peelBtnActionPerformed
 
-    public void getImagePixels() {
-        int w = image.getWidth();
-        int h = image.getHeight();
+    public void loadImage() {
+        BufferedImage image;
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            File[] imgFiles = jfc.getSelectedFiles();
 
-        imagePixels = new int[w][h];
+            for (File imgFile : imgFiles) {
+                if (imgFile != null) {
+                    System.out.println("Selected file: " + imgFile.getAbsolutePath());
 
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                //System.out.println("x,y: " + i + ", " + j);
-                int pixel = image.getRGB(i, j);
-                imagePixels[i][j] = pixel;
+                    try {
+                        image = ImageIO.read(imgFile);
+                        layer.addImage(image);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
             }
         }
     }
 
     public void createImage() {
-        Color rgb;
-        Color gray;
-        displayImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        for (int i = 0; i < image.getWidth(); i++) {
-            for (int j = 0; j < image.getHeight(); j++) {
-                rgb = new Color(image.getRGB(i, j));
-                int ave = (rgb.getRed() + rgb.getBlue() + rgb.getGreen()) / 3;
+        /*
+         Color rgb;
+         Color gray;
+        
+         displayImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+         for (int i = 0; i < image.getWidth(); i++) {
+         for (int j = 0; j < image.getHeight(); j++) {
+         rgb = new Color(image.getRGB(i, j));
+         int ave = (rgb.getRed() + rgb.getBlue() + rgb.getGreen()) / 3;
 
-                gray = new Color(ave, ave, ave);
-                displayImage.setRGB(i, j, gray.getRGB());
-            }
-        }
+         gray = new Color(ave, ave, ave);
+         displayImage.setRGB(i, j, gray.getRGB());
+         }
+         }
+         */
+        displayImage = layer.getImage();
     }
 
     public BufferedImage rotateClockwise() {
@@ -690,8 +787,16 @@ public class ImageView extends javax.swing.JFrame {
         return reverseImage;
     }
 
-    public BufferedImage zoomImage() {
-        int zoomTimes = Integer.parseInt(zoomCombo.getSelectedItem().toString());
+    public BufferedImage zoomImage(String caller) {
+        int zoomTimes = 1;
+        switch (caller) {
+            case ("zoom"):
+                zoomTimes = Integer.parseInt(zoomCombo.getSelectedItem().toString());
+                break;
+            case ("convolve"):
+                zoomTimes = (Integer) convolveMSpinner.getValue();
+                break;
+        }
         ArrayList<Color> colorList = new ArrayList<>();
         BufferedImage zoomedImage = new BufferedImage(displayImage.getWidth() / zoomTimes, displayImage.getHeight() / zoomTimes, BufferedImage.TYPE_INT_ARGB);
         Color zoomedColor;
@@ -710,15 +815,19 @@ public class ImageView extends javax.swing.JFrame {
                     //System.out.println("number of colors = " + colorList.size());
 
                     //average colors
-                    int aveColor = 0;
+                    int aveRed = 0, aveGreen = 0, aveBlue = 0;
                     for (Color c : colorList) {
-                        aveColor += c.getRed();
+                        aveRed += c.getRed();
+                        aveGreen += c.getGreen();
+                        aveBlue += c.getBlue();
                     }
-                    aveColor /= colorList.size();
+                    aveRed /= colorList.size();
+                    aveGreen /= colorList.size();
+                    aveBlue /= colorList.size();
                     colorList.clear();
 
                     //put in zoomed image
-                    zoomedColor = new Color(aveColor, aveColor, aveColor);
+                    zoomedColor = new Color(aveRed, aveGreen, aveBlue);
                     zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
                     zoomX++;
                     if (zoomX > zoomedImage.getWidth() - 1) {
@@ -792,6 +901,10 @@ public class ImageView extends javax.swing.JFrame {
     private javax.swing.JLabel alterLabel;
     private javax.swing.JButton brightenBtn;
     private javax.swing.JSlider brightenSlider;
+    private javax.swing.JLabel convolveKLabel;
+    private javax.swing.JSpinner convolveKSpinner;
+    private javax.swing.JLabel convolveMLabel;
+    private javax.swing.JSpinner convolveMSpinner;
     private javax.swing.JLabel cropHeightLabel;
     private javax.swing.JSpinner cropHeightSpinner;
     private javax.swing.JButton cropImageBtn;
@@ -806,9 +919,12 @@ public class ImageView extends javax.swing.JFrame {
     private javax.swing.JSlider darkenSlider;
     private javax.swing.JLabel imageLabel;
     private javax.swing.JScrollPane imagePanel;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loadImageBtn;
     private javax.swing.JButton noiseBtn;
     private javax.swing.JSlider noiseSlider;
+    private javax.swing.JButton peelBtn;
+    private javax.swing.JLabel peelLabel;
     private javax.swing.JButton reverseBtn;
     private javax.swing.JButton rotateClockwiseBtn;
     private javax.swing.JButton rotateCounterClockwiseBtn;

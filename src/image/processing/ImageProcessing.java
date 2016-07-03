@@ -13,7 +13,8 @@ import layer.Layer;
 
 public class ImageProcessing {
     public static void main(String[] args) {
-       // new ImageView();
+        new ImageView();
+        /*
         Layer l  = new Layer(200,200);
         BufferedImage img = null;
         File outputfile = new File("saved.jpg");
@@ -60,6 +61,7 @@ public class ImageProcessing {
         }
         
    
-        
+        */
     }
+                
 }
