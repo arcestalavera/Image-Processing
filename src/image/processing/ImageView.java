@@ -45,7 +45,7 @@ public class ImageView extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.add(imagePanel);
         this.setVisible(true);
-        jfc = new JFileChooser("C:\\Users\\Arces\\Desktop");
+        jfc = new JFileChooser();
         FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter("PNG file", "png");
         FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("CSV file", "csv");
         jfc.addChoosableFileFilter(jpgFilter);
