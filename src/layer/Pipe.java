@@ -49,14 +49,18 @@ public class Pipe {
     
     
     
-    public void peel(){
+    public int peel(){
+        
+        int pixel;
+        
         if(greyValueSum/total > 100){
-          
+            pixel = list.get(0);
             list.remove(0);
         }else{
+            pixel = list.get(list.size()-1);
             list.remove(list.size()-1);
         }
-        
+        return pixel;
     }
     
     

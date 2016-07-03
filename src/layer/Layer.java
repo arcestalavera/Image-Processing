@@ -6,6 +6,7 @@
 package layer;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 /**
  *
@@ -30,12 +31,12 @@ public class Layer {
         int h = pipes.length;
         int w = pipes[0].length;
         
-    BufferedImage img = new BufferedImage(w, h,BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(w, h,BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
                 //System.out.println("x,y: " + i + ", " + j);
                 //int pixel = image.getRGB(i, j);
-                img.setRGB(i, j, pipes[j][i].getTop());
+                img.setRGB(i, j, pipes[j][i].peel());
                 
                 //imagePixels[i][j] = pixel;
                 
@@ -59,6 +60,22 @@ public class Layer {
             }
         }
     }
+    
+    
+    public ArrayList<BufferedImage> extract(int k,int m){
+        
+        int h = pipes.length;
+        int w = pipes[0].length;
+        int pixel;
+        ArrayList<BufferedImage> image_list = new ArrayList<>();
+        
+        for(int i=0; i< k; i++){
+            image_list.add(getImage());
+        }
+        
+        return image_list;
+    }
+    
     
     
     
