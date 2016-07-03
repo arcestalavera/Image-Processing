@@ -28,7 +28,7 @@ public class Pipe {
     public void addColor(int rgb){
         list.add(rgb);
         Color c = new Color(rgb);
-        greyValueSum =  (c.getBlue() + c.getRed() + c.getGreen()) /3;
+        greyValueSum +=  (c.getBlue() + c.getRed() + c.getGreen()) /3;
         total++;
     }
     
@@ -38,7 +38,7 @@ public class Pipe {
     }
     
     public void whatami(){
-        if(greyValueSum  > 100){
+        if(greyValueSum /total  > 100){
             System.out.println("Queue "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total );
             //list.remove(0);
         }else{
@@ -50,7 +50,7 @@ public class Pipe {
     
     
     public void peel(){
-        if(greyValueSum > 100){
+        if(greyValueSum/total > 100){
           
             list.remove(0);
         }else{
