@@ -1,10 +1,9 @@
 package GUI;
 
+import image.processing.ImageView;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -44,6 +43,7 @@ public class Gui extends javax.swing.JFrame {
 
         inputImages = new ArrayList<>();
         inputLabels = new ArrayList<>();
+        addListeners();
     }
 
     public static Gui getInstance() {
@@ -110,7 +110,7 @@ public class Gui extends javax.swing.JFrame {
 
         panelOutput.setBackground(new java.awt.Color(249, 249, 249));
         panelOutput.setPreferredSize(new java.awt.Dimension(0, 0));
-        panelOutput.setLayout(new java.awt.GridLayout());
+        panelOutput.setLayout(new java.awt.GridLayout(1, 0));
         jScrollPane3.setViewportView(panelOutput);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -122,11 +122,6 @@ public class Gui extends javax.swing.JFrame {
         MenuFile.setText("File");
 
         MenuAddImageFile.setText("Add Image File");
-        MenuAddImageFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MenuAddImageFileActionPerformed(evt);
-            }
-        });
         MenuFile.add(MenuAddImageFile);
 
         menuBar.add(MenuFile);
@@ -136,45 +131,50 @@ public class Gui extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void MenuAddImageFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuAddImageFileActionPerformed
-        JFileChooser fc = new JFileChooser();
-        fc.addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
-        fc.setAcceptAllFileFilterUsed(false);
-        fc.setMultiSelectionEnabled(true);
-        int returnVal = fc.showOpenDialog(gui.getContentPane());
+    public void loadImage() {
+        BufferedImage image;
+        JFileChooser jfc = new JFileChooser();
+        jfc.addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
+        jfc.setAcceptAllFileFilterUsed(false);
+        jfc.setMultiSelectionEnabled(true);
+        int val = jfc.showOpenDialog(this);
+        
+        if (val == JFileChooser.APPROVE_OPTION) {
+            File[] imgFiles = jfc.getSelectedFiles();
 
-        if (returnVal == 0) {
+            panelInput.setPreferredSize(new Dimension(panelInput.getPreferredSize().width, panelInput.getPreferredSize().height + (201 * imgFiles.length)));
+            
+            for (File imgFile : imgFiles) {
+                if (imgFile != null) {
 
-            File[] files = fc.getSelectedFiles();
+                    try {
+                        image = ImageIO.read(imgFile);
+                        
+                        inputImages.add(image);
+                        
+                        JLabel jLabel = new JLabel();
+                        jLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+                        
+                        if(image.getWidth() > 200 && image.getHeight() > 200)
+                            image = resizeImage(200, 200, image);
+                        
+                        jLabel.setIcon(new ImageIcon(image));
+                        
+                        inputLabels.add(jLabel);
 
-            try {
-                int len = files.length;
-                //GridLayout layout = (GridLayout)panelInput.getLayout();
-                //layout.setRows(inputLabels.size() + len);
-                panelInput.setPreferredSize(new Dimension(panelInput.getPreferredSize().width, panelInput.getPreferredSize().height + (201 * len)));
+                        panelInput.add(jLabel);
+                        panelInput.revalidate();
+                        panelInput.repaint();
 
-                for (int i = 0; i < len; i++) {
-                    BufferedImage image = ImageIO.read(files[i]);
-
-                    inputImages.add(image);
-
-                    JLabel jLabel = new JLabel();
-                    jLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-                    jLabel.setIcon(new ImageIcon(resizeImage(200, 200, image)));
-
-                    //jLabel.setIcon(new ImageIcon(image));
-                    inputLabels.add(jLabel);
-
-                    panelInput.add(jLabel);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-                addInputImagesListeners();
-            } catch (IOException ex) {
-                Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+            addInputImagesListeners();
         }
-    }//GEN-LAST:event_MenuAddImageFileActionPerformed
-
+    }
+    
     private BufferedImage resizeImage(int width, int height, BufferedImage image) {
         BufferedImage bImg = image;
 
@@ -187,6 +187,36 @@ public class Gui extends javax.swing.JFrame {
         return bImg;
     }
 
+    private void addListeners() {
+        MenuAddImageFile.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                loadImage();
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+
+        });
+    }
+
+    
+    
     private void addInputImagesListeners() {
         int len = inputLabels.size();
         for (int i = 0; i < len; i++) {

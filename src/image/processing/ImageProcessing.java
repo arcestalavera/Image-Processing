@@ -6,25 +6,20 @@
 package image.processing;
 
 import GUI.Gui;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import javax.imageio.ImageIO;
-import layer.Layer;
 
 public class ImageProcessing {
     public static void main(String[] args) {
-<<<<<<< HEAD
+
         
         Gui.getInstance();
         
        // new ImageView();
         /*Layer l  = new Layer(200,200);
-=======
+
         new ImageView();
         /*
         Layer l  = new Layer(200,200);
->>>>>>> refs/remotes/origin/master
+        refs/remotes/origin/master
         BufferedImage img = null;
         File outputfile = new File("saved.jpg");
    
