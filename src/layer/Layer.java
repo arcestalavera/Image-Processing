@@ -118,6 +118,9 @@ public class Layer {
         
     }
     
+    public int getPileSize(){
+        return pipes.length;
+    }
     
     
 }
