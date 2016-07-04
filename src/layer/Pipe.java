@@ -39,10 +39,10 @@ public class Pipe {
     
     public void whatami(){
         if(greyValueSum /total  > 127){
-            System.out.println("Queue "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total );
+            //System.out.println("Queue "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total );
             //list.remove(0);
         }else{
-            System.out.println("Stack "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total);
+            //System.out.println("Stack "+ greyValueSum / total+"( "+ greyValueSum+ ")"+ total);
         }
     }
     

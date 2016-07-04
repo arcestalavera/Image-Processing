@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import layer.Layer;
 
@@ -23,11 +24,17 @@ public class Gui extends javax.swing.JFrame {
 
     private static final Gui gui = new Gui();
 
+    private final int INPUT_MODE = 0;
+    private final int OUTPUT_MODE = 1;
+    
     private ArrayList<BufferedImage> inputImages;
     private ArrayList<JLabel> inputLabels;
 
-    private Layer layer;
+    private ArrayList<BufferedImage> outputImages;
+    private ArrayList<JLabel> outputLabels;
     
+    private Layer layer;
+
     private Gui() {
 
         try {
@@ -46,9 +53,12 @@ public class Gui extends javax.swing.JFrame {
 
         inputImages = new ArrayList<>();
         inputLabels = new ArrayList<>();
+
+        outputImages = new ArrayList<>();
+        outputLabels = new ArrayList<>();
         
-        layer = new Layer(200,200);
-        
+        layer = new Layer(200, 200);
+
         addListeners();
     }
 
@@ -64,7 +74,7 @@ public class Gui extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         panelInput = new javax.swing.JPanel();
         panelShow = new javax.swing.JPanel();
-        LabelView = new javax.swing.JLabel();
+        labelView = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         panelOutput = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -74,9 +84,10 @@ public class Gui extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jSpinner2 = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
+        spinnerK = new javax.swing.JSpinner();
+        spinnerM = new javax.swing.JSpinner();
+        extractButton = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         MenuFile = new javax.swing.JMenu();
         MenuAddImageFile = new javax.swing.JMenuItem();
@@ -108,21 +119,21 @@ public class Gui extends javax.swing.JFrame {
         panelShowLayout.setHorizontalGroup(
             panelShowLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelShowLayout.createSequentialGroup()
-                .addGap(265, 265, 265)
-                .addComponent(LabelView, javax.swing.GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(labelView, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+                .addContainerGap())
         );
         panelShowLayout.setVerticalGroup(
             panelShowLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelShowLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(LabelView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(labelView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.6;
         gridBagConstraints.weighty = 0.8;
@@ -132,7 +143,7 @@ public class Gui extends javax.swing.JFrame {
 
         panelOutput.setBackground(new java.awt.Color(249, 249, 249));
         panelOutput.setPreferredSize(new java.awt.Dimension(0, 0));
-        panelOutput.setLayout(new java.awt.GridLayout(1, 0));
+        panelOutput.setLayout(new javax.swing.BoxLayout(panelOutput, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane3.setViewportView(panelOutput);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -155,7 +166,7 @@ public class Gui extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -211,26 +222,31 @@ public class Gui extends javax.swing.JFrame {
 
         jLabel4.setText("M");
 
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
+        spinnerK.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
 
-        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
+        spinnerM.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
 
-        jButton1.setText("Extract");
+        extractButton.setText("Extract");
+        extractButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                extractButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(51, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel4)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(28, 28, 28)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                    .addComponent(jSpinner2)
-                    .addComponent(jSpinner1))
+                    .addComponent(extractButton, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                    .addComponent(spinnerM)
+                    .addComponent(spinnerK))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -239,14 +255,14 @@ public class Gui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(spinnerK, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(spinnerM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addComponent(extractButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -256,6 +272,27 @@ public class Gui extends javax.swing.JFrame {
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.weighty = 0.15;
         getContentPane().add(jPanel1, gridBagConstraints);
+
+        jPanel4.setPreferredSize(new java.awt.Dimension(0, 0));
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 202, Short.MAX_VALUE)
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 111, Short.MAX_VALUE)
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.2;
+        gridBagConstraints.weighty = 0.15;
+        getContentPane().add(jPanel4, gridBagConstraints);
 
         MenuFile.setText("File");
 
@@ -269,51 +306,73 @@ public class Gui extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    public void loadImage() {
-        BufferedImage image;
-        JFileChooser jfc = new JFileChooser();
-        jfc.addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
-        jfc.setAcceptAllFileFilterUsed(false);
-        jfc.setMultiSelectionEnabled(true);
-        int val = jfc.showOpenDialog(this);
+    private void extractButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_extractButtonActionPerformed
+        layer.whou();
         
-        if (val == JFileChooser.APPROVE_OPTION) {
-            File[] imgFiles = jfc.getSelectedFiles();
+        outputImages = new ArrayList<>();
+        outputLabels = new ArrayList<>();
+        
+        ArrayList<BufferedImage> images = layer.extract(Integer.parseInt(spinnerK.getValue().toString()), Integer.parseInt(spinnerM.getValue().toString()));
 
-            panelInput.setPreferredSize(new Dimension(panelInput.getPreferredSize().width, panelInput.getPreferredSize().height + (201 * imgFiles.length)));
+        File[] imgArray = new File[images.size()];
+        
+        int num = 0;
+        for (BufferedImage img : images) {
             
-            for (File imgFile : imgFiles) {
-                if (imgFile != null) {
+            try {
+                ImageIO.write(img, "jpg", new File("output " + (num+1) + ".jpg"));
+                imgArray[num] = new File("output " + (num+1) + ".jpg");
+            } catch (IOException ex) {
+                Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            num++;
+        }
+        
+        loadImage(imgArray, outputImages, outputLabels, panelOutput, OUTPUT_MODE);
+        
+    }//GEN-LAST:event_extractButtonActionPerformed
 
-                    try {
-                        image = ImageIO.read(imgFile);
-                        
-                        inputImages.add(image);
+    public void loadImage(File[] imgFiles, ArrayList<BufferedImage> images, ArrayList<JLabel> labels, JPanel panel, int mode) {
+        BufferedImage image;
+
+        panel.setPreferredSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height + (201 * imgFiles.length)));
+
+        for (File imgFile : imgFiles) {
+            if (imgFile != null) {
+
+                try {
+                    image = ImageIO.read(imgFile);
+
+                    images.add(image);
+                    if(mode == INPUT_MODE){
+                        System.out.println("Hello");
                         layer.addImage(image);
-                        
-                        JLabel jLabel = new JLabel();
-                        jLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-                        
-                        if(image.getWidth() > 200 && image.getHeight() > 200)
-                            image = resizeImage(200, 200, image);
-                        
-                        jLabel.setIcon(new ImageIcon(image));
-                        
-                        inputLabels.add(jLabel);
-
-                        panelInput.add(jLabel);
-                        panelInput.revalidate();
-                        panelInput.repaint();
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
                     }
+
+                    JLabel jLabel = new JLabel();
+                    jLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+
+                    if (image.getWidth() > 200 && image.getHeight() > 200) {
+                        image = resizeImage(200, 200, image);
+                    }
+
+                    jLabel.setIcon(new ImageIcon(image));
+
+                    labels.add(jLabel);
+
+                    panel.add(jLabel);
+                    panel.revalidate();
+                    panel.repaint();
+
+                } catch (IOException ex) {
+                    Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            addInputImagesListeners();
         }
+        addLabelListeners(labels, images);
+
     }
-    
+
     private BufferedImage resizeImage(int width, int height, BufferedImage image) {
         BufferedImage bImg = image;
 
@@ -335,12 +394,21 @@ public class Gui extends javax.swing.JFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                loadImage();
+
+                JFileChooser jfc = new JFileChooser();
+                jfc.addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
+                jfc.setAcceptAllFileFilterUsed(false);
+                jfc.setMultiSelectionEnabled(true);
+                int val = jfc.showOpenDialog(gui);
+
+                if (val == JFileChooser.APPROVE_OPTION) {
+                    loadImage(jfc.getSelectedFiles(), inputImages, inputLabels, panelInput, INPUT_MODE);
+                }
             }
 
             @Override
@@ -354,16 +422,16 @@ public class Gui extends javax.swing.JFrame {
         });
     }
 
-    private void addInputImagesListeners() {
-        int len = inputLabels.size();
+    private void addLabelListeners(ArrayList<JLabel> labels, ArrayList<BufferedImage> images) {
+        int len = labels.size();
         for (int i = 0; i < len; i++) {
             final int index = i;
-            inputLabels.get(i).addMouseListener(new MouseListener() {
+            labels.get(i).addMouseListener(new MouseListener() {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    LabelView.setIcon(new ImageIcon(inputImages.get(index)));
-                    LabelView.setHorizontalAlignment(JLabel.CENTER);
+                    labelView.setIcon(new ImageIcon(images.get(index)));
+                    labelView.setHorizontalAlignment(JLabel.CENTER);
                 }
 
                 @Override
@@ -389,10 +457,9 @@ public class Gui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel LabelView;
     private javax.swing.JMenuItem MenuAddImageFile;
     private javax.swing.JMenu MenuFile;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton extractButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -400,13 +467,15 @@ public class Gui extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
+    private javax.swing.JLabel labelView;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JPanel panelInput;
     private javax.swing.JPanel panelOutput;
     private javax.swing.JPanel panelShow;
+    private javax.swing.JSpinner spinnerK;
+    private javax.swing.JSpinner spinnerM;
     // End of variables declaration//GEN-END:variables
 }
