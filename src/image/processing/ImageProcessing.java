@@ -5,6 +5,7 @@
  */
 package image.processing;
 
+import GUI.Gui;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -13,8 +14,11 @@ import layer.Layer;
 
 public class ImageProcessing {
     public static void main(String[] args) {
+        
+        Gui.getInstance();
+        
        // new ImageView();
-        Layer l  = new Layer(200,200);
+        /*Layer l  = new Layer(200,200);
         BufferedImage img = null;
         File outputfile = new File("saved.jpg");
    
@@ -60,6 +64,6 @@ public class ImageProcessing {
         }
         
    
-        
+        */
     }
 }
