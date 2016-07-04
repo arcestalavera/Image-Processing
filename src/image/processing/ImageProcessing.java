@@ -19,7 +19,7 @@ public class ImageProcessing {
         new ImageView();
         /*
         Layer l  = new Layer(200,200);
-        refs/remotes/origin/master
+        
         BufferedImage img = null;
         File outputfile = new File("saved.jpg");
    
