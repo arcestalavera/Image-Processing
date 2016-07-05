@@ -57,7 +57,7 @@ public class Gui extends javax.swing.JFrame {
         outputImages = new ArrayList<>();
         outputLabels = new ArrayList<>();
         
-        layer = new Layer(200, 200);
+        layer = new Layer(720, 720);
 
         addListeners();
     }

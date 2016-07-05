@@ -39,12 +39,22 @@ public class ImageView extends javax.swing.JFrame {
     private JFileChooser jfc;
     private JFormattedTextField xTextField, yTextField, widthTextField, heightTextField, kTextField, mTextField;
     private JComponent xComp, yComp, widthComp, heightComp, kComp, mComp;
-    private ArrayList<BufferedImage> convolvedImages;
+    private ArrayList<BufferedImage> displayImages;
+    private int currentIndex;
 
     public ImageView() {
         layer = new Layer(720, 720);
-        convolvedImages = new ArrayList<>();
-
+        displayImages = new ArrayList<>();
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Windows".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(ImageView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
         initComponents();
 
         this.setLocationRelativeTo(null);
@@ -102,7 +112,6 @@ public class ImageView extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         actionPanel = new javax.swing.JPanel();
         loadImageBtn = new javax.swing.JButton();
-        saveImageBtn = new javax.swing.JButton();
         rotateCounterClockwiseBtn = new javax.swing.JButton();
         rotateClockwiseBtn = new javax.swing.JButton();
         rotateLabel = new javax.swing.JLabel();
@@ -133,6 +142,10 @@ public class ImageView extends javax.swing.JFrame {
         convolveKLabel = new javax.swing.JLabel();
         convolveMSpinner = new javax.swing.JSpinner();
         convolveMLabel = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        saveImageBtn = new javax.swing.JButton();
+        nextBtn = new javax.swing.JButton();
+        previousBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Image Manipulation App");
@@ -149,27 +162,18 @@ public class ImageView extends javax.swing.JFrame {
         imageLabel.setPreferredSize(new java.awt.Dimension(722, 720));
         imagePanel.setViewportView(imageLabel);
 
+        jScrollPane1.setBorder(null);
+
         actionPanel.setBackground(new java.awt.Color(255, 255, 255));
         actionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Century Gothic", 2, 12))); // NOI18N
 
         loadImageBtn.setBackground(new java.awt.Color(236, 236, 245));
         loadImageBtn.setFont(new java.awt.Font("Century Gothic", 0, 11)); // NOI18N
-        loadImageBtn.setText("Load Image");
+        loadImageBtn.setText("Load Image/s");
         loadImageBtn.setFocusable(false);
         loadImageBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 loadImageBtnActionPerformed(evt);
-            }
-        });
-
-        saveImageBtn.setBackground(new java.awt.Color(236, 236, 245));
-        saveImageBtn.setFont(new java.awt.Font("Century Gothic", 0, 11)); // NOI18N
-        saveImageBtn.setText("Save Image");
-        saveImageBtn.setEnabled(false);
-        saveImageBtn.setFocusable(false);
-        saveImageBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveImageBtnActionPerformed(evt);
             }
         });
 
@@ -383,7 +387,6 @@ public class ImageView extends javax.swing.JFrame {
                             .addComponent(peelBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cropImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(loadImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(reverseBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(noiseSlider, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addComponent(noiseBtn, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -429,7 +432,7 @@ public class ImageView extends javax.swing.JFrame {
                                                 .addComponent(cropYSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(actionPanelLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGap(0, 8, Short.MAX_VALUE)
                                 .addComponent(rotateCounterClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(rotateClockwiseBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -454,11 +457,9 @@ public class ImageView extends javax.swing.JFrame {
         actionPanelLayout.setVerticalGroup(
             actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(actionPanelLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGap(15, 15, 15)
                 .addComponent(loadImageBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(saveImageBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(15, 15, 15)
                 .addComponent(rotateLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -525,6 +526,64 @@ public class ImageView extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(actionPanel);
 
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        saveImageBtn.setBackground(new java.awt.Color(255, 255, 255));
+        saveImageBtn.setFont(new java.awt.Font("Century Gothic", 0, 11)); // NOI18N
+        saveImageBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/save.png"))); // NOI18N
+        saveImageBtn.setText("Save Image");
+        saveImageBtn.setEnabled(false);
+        saveImageBtn.setFocusable(false);
+        saveImageBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveImageBtnActionPerformed(evt);
+            }
+        });
+
+        nextBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/right.png"))); // NOI18N
+        nextBtn.setToolTipText("Next Image");
+        nextBtn.setEnabled(false);
+        nextBtn.setFocusable(false);
+        nextBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextBtnActionPerformed(evt);
+            }
+        });
+
+        previousBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/left.png"))); // NOI18N
+        previousBtn.setToolTipText("Previous Image");
+        previousBtn.setEnabled(false);
+        previousBtn.setFocusable(false);
+        previousBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                previousBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(previousBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(223, 223, 223)
+                .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                .addGap(223, 223, 223)
+                .addComponent(nextBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(nextBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(previousBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(5, 5, 5))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -532,13 +591,19 @@ public class ImageView extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 745, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 756, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(imagePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
 
         pack();
@@ -547,7 +612,8 @@ public class ImageView extends javax.swing.JFrame {
     private void loadImageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadImageBtnActionPerformed
         loadImage();
         if (layer != null) {
-            createImage();
+            currentIndex = 0;
+            displayImage = displayImages.get(0);
 
             imageLabel.setIcon(new ImageIcon(displayImage));
 
@@ -571,6 +637,8 @@ public class ImageView extends javax.swing.JFrame {
             convolveKSpinner.setEnabled(true);
             convolveMSpinner.setEnabled(true);
             peelBtn.setEnabled(true);
+            previousBtn.setEnabled(true);
+            nextBtn.setEnabled(true);
 
             SpinnerNumberModel xCrop = (SpinnerNumberModel) cropXSpinner.getModel();
             xCrop.setMaximum(displayImage.getWidth());
@@ -659,7 +727,7 @@ public class ImageView extends javax.swing.JFrame {
     }//GEN-LAST:event_darkenBtnActionPerformed
 
     private void zoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomBtnActionPerformed
-        displayImage = zoomImage("zoom");
+        displayImage = zoomImage(displayImage, "zoom");
         imageLabel.setIcon(new ImageIcon(new ImageIcon(displayImage).getImage().getScaledInstance(720, 720, Image.SCALE_SMOOTH)));
     }//GEN-LAST:event_zoomBtnActionPerformed
 
@@ -676,7 +744,7 @@ public class ImageView extends javax.swing.JFrame {
                         ImageIO.write(displayImage, extension, jfc.getSelectedFile());
                         break;
                     case "csv":
-                        createCSVFile(file.substring(file.lastIndexOf("/") + 1));
+                        createCSVFile(displayImage, file.substring(file.lastIndexOf("/") + 1));
                         break;
                 }
             } catch (IOException ex) {
@@ -691,15 +759,20 @@ public class ImageView extends javax.swing.JFrame {
         int k = (Integer) convolveKSpinner.getValue();
         int m = (Integer) convolveMSpinner.getValue();
         int ctr = 1;
+        displayImages.clear();
         if (k != 0 && m != 0) {
-            convolvedImages = layer.extract(k, m);
-            displayImage = layer.getImage();
-            displayImage = zoomImage("convolve");
+            displayImages = layer.extract(k, m);
+            currentIndex = 0;
+            for (int i = 0; i < displayImages.size(); i++) {
+                displayImages.set(i, zoomImage(displayImages.get(i), "convolve"));
+            }
+
+            displayImage = displayImages.get(0);
             imageLabel.setIcon(new ImageIcon(displayImage));
 
             try {
-                for (BufferedImage img : convolvedImages) {
-                    createCSVFile("[CSV] Convolved Image " + ctr + ".csv");
+                for (BufferedImage img : displayImages) {
+                    createCSVFile(img, "[CSV] Convolved Image " + ctr + ".csv");
                     ImageIO.write(img, "jpg", new File("[JPG] Convolved Image " + ctr + ".jpg"));
 
                     ctr++;
@@ -709,6 +782,22 @@ public class ImageView extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_peelBtnActionPerformed
+
+    private void previousBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_previousBtnActionPerformed
+        if (currentIndex > 0) {
+            displayImage = displayImages.get(currentIndex - 1);
+            currentIndex--;
+            imageLabel.setIcon(new ImageIcon(displayImage));
+        }
+    }//GEN-LAST:event_previousBtnActionPerformed
+
+    private void nextBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextBtnActionPerformed
+        if (currentIndex < displayImages.size() - 1) {
+            displayImage = displayImages.get(currentIndex + 1);
+            currentIndex++;
+            imageLabel.setIcon(new ImageIcon(displayImage));
+        }
+    }//GEN-LAST:event_nextBtnActionPerformed
 
     public void loadImage() {
         BufferedImage image;
@@ -723,6 +812,7 @@ public class ImageView extends javax.swing.JFrame {
                     try {
                         image = ImageIO.read(imgFile);
                         layer.addImage(image);
+                        displayImages.add(image);
                     } catch (IOException ex) {
                         Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -732,50 +822,32 @@ public class ImageView extends javax.swing.JFrame {
         }
     }
 
-    public void createImage() {
-        /*
-         Color rgb;
-         Color gray;
-        
-         displayImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-         for (int i = 0; i < image.getWidth(); i++) {
-         for (int j = 0; j < image.getHeight(); j++) {
-         rgb = new Color(image.getRGB(i, j));
-         int ave = (rgb.getRed() + rgb.getBlue() + rgb.getGreen()) / 3;
-
-         gray = new Color(ave, ave, ave);
-         displayImage.setRGB(i, j, gray.getRGB());
-         }
-         }
-         */
-        displayImage = layer.getImage();
-    }
-
     public BufferedImage rotateClockwise() {
-        BufferedImage cwImage = new BufferedImage(displayImage.getHeight(), displayImage.getWidth(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage cwImage = new BufferedImage(displayImage.getHeight(), displayImage.getWidth(), BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < displayImage.getHeight(); i++) {
             for (int j = 0; j < displayImage.getWidth(); j++) {
                 cwImage.setRGB(i, j, displayImage.getRGB(j, displayImage.getHeight() - 1 - i));
             }
         }
-
+        displayImages.set(currentIndex, cwImage);
         return cwImage;
     }
 
     public BufferedImage rotateCounterClockwise() {
-        BufferedImage ccwImage = new BufferedImage(displayImage.getHeight(), displayImage.getWidth(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage ccwImage = new BufferedImage(displayImage.getHeight(), displayImage.getWidth(), BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < displayImage.getHeight(); i++) {
             for (int j = 0; j < displayImage.getWidth(); j++) {
                 ccwImage.setRGB(i, j, displayImage.getRGB(displayImage.getWidth() - 1 - j, i));
             }
         }
 
+        displayImages.set(currentIndex, ccwImage);
         return ccwImage;
     }
 
     public BufferedImage reverseColor() {
         Color rgb, reverseColor;
-        BufferedImage reverseImage = new BufferedImage(displayImage.getWidth(), displayImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage reverseImage = new BufferedImage(displayImage.getWidth(), displayImage.getHeight(), BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < displayImage.getWidth(); i++) {
             for (int j = 0; j < displayImage.getHeight(); j++) {
                 rgb = new Color(displayImage.getRGB(i, j));
@@ -784,10 +856,11 @@ public class ImageView extends javax.swing.JFrame {
             }
         }
 
+        displayImages.set(currentIndex, reverseImage);
         return reverseImage;
     }
 
-    public BufferedImage zoomImage(String caller) {
+    public BufferedImage zoomImage(BufferedImage image, String caller) {
         int zoomTimes = 1;
         switch (caller) {
             case ("zoom"):
@@ -798,15 +871,15 @@ public class ImageView extends javax.swing.JFrame {
                 break;
         }
         ArrayList<Color> colorList = new ArrayList<>();
-        BufferedImage zoomedImage = new BufferedImage(displayImage.getWidth() / zoomTimes, displayImage.getHeight() / zoomTimes, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage zoomedImage = new BufferedImage(image.getWidth() / zoomTimes, image.getHeight() / zoomTimes, BufferedImage.TYPE_INT_RGB);
         Color zoomedColor;
 
         int zoomX = 0;
         int zoomY = 0;
 
-        for (int i = 0; i < displayImage.getWidth(); i += zoomTimes) {
-            for (int j = 0; i < displayImage.getWidth() && j < displayImage.getHeight(); j++) {
-                colorList.add(new Color(displayImage.getRGB(i, j)));
+        for (int i = 0; i < image.getWidth(); i += zoomTimes) {
+            for (int j = 0; i < image.getWidth() && j < image.getHeight(); j++) {
+                colorList.add(new Color(image.getRGB(i, j)));
                 if ((j + 1) % zoomTimes == 0) {
                     i++;
                     j -= zoomTimes;
@@ -840,21 +913,26 @@ public class ImageView extends javax.swing.JFrame {
                 }
             }
         }
+        displayImages.set(currentIndex, zoomedImage);
         return zoomedImage;
     }
 
     public BufferedImage brightenImage() {
         float brightValue = (float) (1 + (float) brightenSlider.getValue() / 100);
 
-        RescaleOp ro = new RescaleOp(new float[]{brightValue, brightValue, brightValue, 1.0f}, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, null);
-        return ro.filter(displayImage, null);
+        RescaleOp ro = new RescaleOp(brightValue, 0, null);
+        BufferedImage brightImage = ro.filter(displayImage, null);
+        displayImages.set(currentIndex, brightImage);
+        return brightImage;
     }
 
     public BufferedImage darkenImage() {
         float darkValue = (float) (1 - (float) darkenSlider.getValue() / 100);
 
-        RescaleOp ro = new RescaleOp(new float[]{darkValue, darkValue, darkValue, 1.0f}, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, null);
-        return ro.filter(displayImage, null);
+        RescaleOp ro = new RescaleOp(darkValue, 0, null);
+        BufferedImage darkImage = ro.filter(displayImage, null);
+        displayImages.set(currentIndex, darkImage);
+        return darkImage;
     }
 
     public BufferedImage cropImage(int cropWidth, int cropHeight) {
@@ -862,7 +940,7 @@ public class ImageView extends javax.swing.JFrame {
         int cropY = (Integer) cropYSpinner.getValue();
 
         //System.out.println("x = " + cropX + " y = " + cropY + " w = " + cropWidth + " h = " + cropHeight);
-        BufferedImage croppedImage = new BufferedImage(cropWidth, cropHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage croppedImage = new BufferedImage(cropWidth, cropHeight, BufferedImage.TYPE_INT_RGB);
 
         for (int i = cropX; i < displayImage.getWidth() && i - cropX < cropWidth - 1; i++) {
             for (int j = cropY; j < displayImage.getHeight() && j - cropY < cropHeight - 1; j++) {
@@ -874,15 +952,16 @@ public class ImageView extends javax.swing.JFrame {
         return croppedImage;
     }
 
-    public void createCSVFile(String csvName) {
+    public void createCSVFile(BufferedImage image, String csvName) {
+        //GRAY SCALE ONLY
         Color pixel;
         try {
             FileWriter fw = new FileWriter(csvName);
 
-            for (int i = 0; i < displayImage.getHeight(); i++) {
-                for (int j = 0; j < displayImage.getWidth(); j++) {
-                    pixel = new Color(displayImage.getRGB(i, j));
-                    fw.write("" + pixel.getRed());
+            for (int i = 0; i < image.getHeight(); i++) {
+                for (int j = 0; j < image.getWidth(); j++) {
+                    pixel = new Color(image.getRGB(i, j));
+                    fw.write("" + ((pixel.getRed() + pixel.getGreen() + pixel.getBlue()) / 3));
                     fw.write(",");
                 }
                 fw.write("\n");
@@ -919,12 +998,15 @@ public class ImageView extends javax.swing.JFrame {
     private javax.swing.JSlider darkenSlider;
     private javax.swing.JLabel imageLabel;
     private javax.swing.JScrollPane imagePanel;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loadImageBtn;
+    private javax.swing.JButton nextBtn;
     private javax.swing.JButton noiseBtn;
     private javax.swing.JSlider noiseSlider;
     private javax.swing.JButton peelBtn;
     private javax.swing.JLabel peelLabel;
+    private javax.swing.JButton previousBtn;
     private javax.swing.JButton reverseBtn;
     private javax.swing.JButton rotateClockwiseBtn;
     private javax.swing.JButton rotateCounterClockwiseBtn;
