@@ -57,8 +57,15 @@ public class Gui extends javax.swing.JFrame {
         outputImages = new ArrayList<>();
         outputLabels = new ArrayList<>();
         
-        layer = new Layer(720, 720);
-
+        layer = new Layer(200, 200);
+        BufferedImage  img = null;
+        try {
+            img = ImageIO.read(new File("template.jpg"));
+        } catch (IOException ex) {
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        layer.addTemplate(img);
+        
         addListeners();
     }
 

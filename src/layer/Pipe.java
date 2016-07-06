@@ -18,8 +18,10 @@ public class Pipe {
     public int greyValueSum;
     public int total;
     
+    public int mode;
     
     public Pipe(){
+       mode = 0;
        greyValueSum = 0;
        total = 0;
        list= new ArrayList<>();
@@ -30,6 +32,13 @@ public class Pipe {
         Color c = new Color(rgb);
         greyValueSum +=  (c.getBlue() + c.getRed() + c.getGreen()) /3;
         total++;
+    }
+    
+    
+    public void setMode(boolean isQueue){
+        if(isQueue){
+            mode = 1;
+        }else mode = -1; 
     }
     
     
@@ -53,7 +62,7 @@ public class Pipe {
         
         int pixel;
         
-        if(greyValueSum/total > 127){
+        if(mode == 1){
             pixel = list.get(0);
             list.remove(0);
         }else{
