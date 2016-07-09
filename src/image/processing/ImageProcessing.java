@@ -11,9 +11,9 @@ public class ImageProcessing {
     public static void main(String[] args) {
 
         
-        Gui.getInstance();
+        //Gui.getInstance();
         
-        //new ImageView();
+        new ImageView();
         /*Layer l  = new Layer(200,200);
 
         new ImageView();

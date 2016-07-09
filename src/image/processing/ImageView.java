@@ -6,6 +6,7 @@
 package image.processing;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
@@ -42,6 +43,9 @@ public class ImageView extends javax.swing.JFrame {
     private ArrayList<BufferedImage> displayImages;
     private int currentIndex;
 
+    private ViewPanel inputPanel;
+    private ViewPanel outputPanel;
+    
     public ImageView() {
         layer = new Layer(720, 720);
         displayImages = new ArrayList<>();
@@ -96,6 +100,18 @@ public class ImageView extends javax.swing.JFrame {
         kTextField = (JFormattedTextField) kComp.getComponent(0);
         DefaultFormatter kFormatter = (DefaultFormatter) kTextField.getFormatter();
         kFormatter.setCommitsOnValidEdit(true);
+        
+        inputPanel = new ViewPanel("Input Images");
+        outputPanel = new ViewPanel("Output Images");
+        
+        inputPanel.setBounds(0, 0, inputPanel.getPreferredSize().width, inputPanel.getPreferredSize().height);
+        outputPanel.setBounds(this.getBounds().x + this.getPreferredSize().width, 0, inputPanel.getPreferredSize().width, inputPanel.getPreferredSize().height);
+        
+        inputPanel.setObserver(this);
+        outputPanel.setObserver(this);
+        
+        inputPanel.setVisible(true);
+        outputPanel.setVisible(true);
     }
 
     /**
@@ -772,6 +788,7 @@ public class ImageView extends javax.swing.JFrame {
 
             try {
                 for (BufferedImage img : displayImages) {
+                    outputPanel.addImage(img);
                     createCSVFile(img, "[CSV] Convolved Image " + ctr + ".csv");
                     ImageIO.write(img, "jpg", new File("[JPG] Convolved Image " + ctr + ".jpg"));
 
@@ -812,6 +829,7 @@ public class ImageView extends javax.swing.JFrame {
                     try {
                         image = ImageIO.read(imgFile);
                         layer.addImage(image);
+                        inputPanel.addImage(image);
                         displayImages.add(image);
                     } catch (IOException ex) {
                         Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
@@ -974,7 +992,11 @@ public class ImageView extends javax.swing.JFrame {
             Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
+    public void updateCurrentImage(BufferedImage image){
+        imageLabel.setIcon(new ImageIcon(image));
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel actionPanel;
     private javax.swing.JLabel alterLabel;
