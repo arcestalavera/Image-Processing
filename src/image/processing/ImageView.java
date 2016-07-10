@@ -5,6 +5,7 @@
  */
 package image.processing;
 
+import GUI.Gui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -47,7 +48,17 @@ public class ImageView extends javax.swing.JFrame {
     private ViewPanel outputPanel;
     
     public ImageView() {
-        layer = new Layer(720, 720);
+        layer = new Layer(200, 200);
+        //layer = new Layer(200, 200);
+        BufferedImage  img = null;
+        try {
+            img = ImageIO.read(new File("template.jpg"));
+        } catch (IOException ex) {
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        layer.addTemplate(img);
+        
+        
         displayImages = new ArrayList<>();
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -817,6 +828,7 @@ public class ImageView extends javax.swing.JFrame {
     }//GEN-LAST:event_nextBtnActionPerformed
 
     public void loadImage() {
+        
         BufferedImage image;
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
