@@ -34,6 +34,14 @@ public class Layer {
     }
 
     public void restart() {
+        
+        while(!pipes[0][0].isEmpty()){
+            PeelLayer();
+        }
+        
+        
+        /*
+        
         pipes = new Pipe[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -60,7 +68,7 @@ public class Layer {
             }
         }
         
-        
+        */
 
     }
 

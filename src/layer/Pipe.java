@@ -55,7 +55,10 @@ public class Pipe {
         }
     }
     
-    
+    public boolean isEmpty(){
+
+        return list.isEmpty();
+    }
     
     
     public int peel(){
