@@ -7,7 +7,10 @@ package layer;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -17,14 +20,15 @@ public class Layer {
 
     public Pipe[][] pipes;
     private int width, height;
-
+    private int num_layers;
     public BufferedImage template = null;
 
     public Layer(int width, int height) {
+        num_layers = 0;
         pipes = new Pipe[width][height];
         this.width = width;
         this.height = height;
-
+        System.out.println(this.width+" "+this.height +"My width and height");
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 pipes[y][x] = new Pipe();
@@ -34,42 +38,49 @@ public class Layer {
     }
 
     public void restart() {
-        
-        while(!pipes[0][0].isEmpty()){
-            PeelLayer();
+        num_layers =0;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                pipes[y][x].restartList();
+            }
         }
+        
         
         
         /*
-        
-        pipes = new Pipe[width][height];
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                pipes[y][x] = new Pipe();
-            }
+        while (!pipes[0][0].isEmpty()) {
+            PeelLayer();
         }
-        
-        int w = template.getWidth();
-        int h = template.getHeight();
-        Color c;
-        //imagePixels = new int[w][h];
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
-                //System.out.println("x,y: " + i + ", " + j);
-                int pixel = template.getRGB(i, j);
-                c = new Color(pixel);
-                if ((c.getRed() + c.getBlue() + c.getGreen()) / 3 > 127) {
-                    pipes[j][i].setMode(true);
-                } else {
-                    pipes[j][i].setMode(false);
-                }
 
-                //imagePixels[i][j] = pixel;
-            }
-        }
+        /*
         
-        */
+         pipes = new Pipe[width][height];
+         for (int x = 0; x < width; x++) {
+         for (int y = 0; y < height; y++) {
+         pipes[y][x] = new Pipe();
+         }
+         }
+        
+         int w = template.getWidth();
+         int h = template.getHeight();
+         Color c;
+         //imagePixels = new int[w][h];
+         for (int i = 0; i < w; i++) {
+         for (int j = 0; j < h; j++) {
+         //System.out.println("x,y: " + i + ", " + j);
+         int pixel = template.getRGB(i, j);
+         c = new Color(pixel);
+         if ((c.getRed() + c.getBlue() + c.getGreen()) / 3 > 127) {
+         pipes[j][i].setMode(true);
+         } else {
+         pipes[j][i].setMode(false);
+         }
 
+         //imagePixels[i][j] = pixel;
+         }
+         }
+        
+         */
     }
 
     public BufferedImage getImage() {
@@ -110,12 +121,23 @@ public class Layer {
         int h = pipes.length;
         int w = pipes[0].length;
         int pixel;
+        BufferedImage img;
         ArrayList<BufferedImage> image_list = new ArrayList<>();
-
+        File outputfile;
         for (int i = 0; i < k; i++) {
-            image_list.add(getImage());
+            img = getImage();
+            
+            try {
+                outputfile = new File("saved_c"+i+".jpg");
+                ImageIO.write(img, "jpg", outputfile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+            image_list.add(img);
         }
-
+        num_layers -= k;
+        System.out.println("After Peek layers :"+num_layers );
         return image_list;
     }
 
@@ -161,7 +183,7 @@ public class Layer {
     }
 
     public void addImage(BufferedImage image) {
-
+        num_layers ++;
         int w = image.getWidth();
         int h = image.getHeight();
 
@@ -175,6 +197,7 @@ public class Layer {
 
             }
         }
+        System.out.println("Numlayers now:"+num_layers);
 
     }
 

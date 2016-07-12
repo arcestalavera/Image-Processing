@@ -56,10 +56,13 @@ public class Pipe {
     }
     
     public boolean isEmpty(){
-
         return list.isEmpty();
     }
     
+    
+    public void restartList(){
+        list = new ArrayList<>();
+    }
     
     public int peel(){
         
