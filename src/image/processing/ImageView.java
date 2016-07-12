@@ -44,12 +44,13 @@ public class ImageView extends javax.swing.JFrame {
     private ArrayList<BufferedImage> displayImages;
     private int currentIndex;
     private boolean hasTemplate = false, hasImages = false;
+    private final int size = 720;
 
     private ViewPanel inputPanel;
     private ViewPanel outputPanel;
 
     public ImageView() {
-        layer = new Layer(200, 200);
+        layer = new Layer(size, size);
         //layer = new Layer(200, 200);
         displayImages = new ArrayList<>();
         try {
@@ -663,7 +664,7 @@ public class ImageView extends javax.swing.JFrame {
             currentIndex = 0;
             displayImage = displayImages.get(0);
 
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
 
             hasImages = true;
             if (hasImages && hasTemplate) {
@@ -674,12 +675,12 @@ public class ImageView extends javax.swing.JFrame {
 
     private void rotateClockwiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rotateClockwiseBtnActionPerformed
         displayImage = rotateClockwise();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_rotateClockwiseBtnActionPerformed
 
     private void rotateCounterClockwiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rotateCounterClockwiseBtnActionPerformed
         displayImage = rotateCounterClockwise();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_rotateCounterClockwiseBtnActionPerformed
 
     private void cropImageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cropImageBtnActionPerformed
@@ -688,13 +689,13 @@ public class ImageView extends javax.swing.JFrame {
 
         if (cropWidth != 0 && cropHeight != 0) {
             displayImage = cropImage(cropWidth, cropHeight);
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_cropImageBtnActionPerformed
 
     private void reverseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseBtnActionPerformed
         displayImage = reverseColor();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_reverseBtnActionPerformed
 
     private void noiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noiseBtnActionPerformed
@@ -725,17 +726,17 @@ public class ImageView extends javax.swing.JFrame {
             }
             displayImage.setRGB(x, y, noiseColor.getRGB());
         }
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_noiseBtnActionPerformed
 
     private void brightenBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_brightenBtnActionPerformed
         displayImage = brightenImage();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_brightenBtnActionPerformed
 
     private void darkenBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_darkenBtnActionPerformed
         displayImage = darkenImage();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_darkenBtnActionPerformed
 
     private void zoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomBtnActionPerformed
@@ -780,7 +781,7 @@ public class ImageView extends javax.swing.JFrame {
             }
 
             displayImage = displayImages.get(0);
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
 
             try {
                 for (BufferedImage img : displayImages) {
@@ -800,7 +801,7 @@ public class ImageView extends javax.swing.JFrame {
         if (currentIndex > 0) {
             displayImage = displayImages.get(currentIndex - 1);
             currentIndex--;
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_previousBtnActionPerformed
 
@@ -808,7 +809,7 @@ public class ImageView extends javax.swing.JFrame {
         if (currentIndex < displayImages.size() - 1) {
             displayImage = displayImages.get(currentIndex + 1);
             currentIndex++;
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_nextBtnActionPerformed
 
@@ -862,7 +863,7 @@ public class ImageView extends javax.swing.JFrame {
             }
             hasLoaded = true;
         }
-        
+
         return hasLoaded;
     }
 
@@ -915,7 +916,8 @@ public class ImageView extends javax.swing.JFrame {
                 break;
         }
         ArrayList<Color> colorList = new ArrayList<>();
-        BufferedImage zoomedImage = new BufferedImage(image.getWidth() / zoomTimes, image.getHeight() / zoomTimes, BufferedImage.TYPE_INT_RGB);
+        BufferedImage zoomedImage = new BufferedImage((int) Math.floor(image.getWidth() / zoomTimes), (int) Math.floor(image.getHeight() / zoomTimes), BufferedImage.TYPE_INT_RGB);
+        System.out.println("size! " + zoomedImage.getWidth() + " x " + zoomedImage.getHeight());
         Color zoomedColor;
 
         int zoomX = 0;
@@ -945,7 +947,10 @@ public class ImageView extends javax.swing.JFrame {
 
                     //put in zoomed image
                     zoomedColor = new Color(aveRed, aveGreen, aveBlue);
-                    zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
+                   // System.out.println("vs " + zoomX + " x " + zoomY);
+                    if (zoomX < zoomedImage.getWidth() && zoomY < zoomedImage.getHeight()) {
+                        zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
+                    }
                     zoomX++;
                     if (zoomX > zoomedImage.getWidth() - 1) {
                         zoomX = 0;
@@ -1019,8 +1024,10 @@ public class ImageView extends javax.swing.JFrame {
         }
     }
 
-    public void updateCurrentImage(BufferedImage image) {
-        imageLabel.setIcon(new ImageIcon(image));
+    public void updateCurrentImage(BufferedImage image, int index) {
+        displayImage = image;
+        currentIndex = index;
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }
 
     public void enableGUI() {
