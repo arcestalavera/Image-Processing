@@ -775,7 +775,7 @@ public class ImageView extends javax.swing.JFrame {
         int k = (Integer) convolveKSpinner.getValue();
         int m = (Integer) convolveMSpinner.getValue();
         int ctr = 1;
-        
+        outputPanel.emptyImages();
         displayImages.clear();
         //restorePile();
         
