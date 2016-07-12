@@ -40,6 +40,27 @@ public class Layer {
                 pipes[y][x] = new Pipe();
             }
         }
+        
+        int w = template.getWidth();
+        int h = template.getHeight();
+        Color c;
+        //imagePixels = new int[w][h];
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                //System.out.println("x,y: " + i + ", " + j);
+                int pixel = template.getRGB(i, j);
+                c = new Color(pixel);
+                if ((c.getRed() + c.getBlue() + c.getGreen()) / 3 > 127) {
+                    pipes[j][i].setMode(true);
+                } else {
+                    pipes[j][i].setMode(false);
+                }
+
+                //imagePixels[i][j] = pixel;
+            }
+        }
+        
+        
 
     }
 
