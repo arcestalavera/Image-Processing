@@ -76,5 +76,9 @@ public class Pipe {
     }
     
     
+    public void restartList(){
+        list = new ArrayList<>();
+    }
+    
     
 }
