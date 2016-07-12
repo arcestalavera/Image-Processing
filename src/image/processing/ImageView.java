@@ -6,6 +6,7 @@
 package image.processing;
 
 import GUI.Gui;
+import csvIO.CSVIO;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -41,25 +42,20 @@ public class ImageView extends javax.swing.JFrame {
     private JFileChooser jfc;
     private JFormattedTextField xTextField, yTextField, widthTextField, heightTextField, kTextField, mTextField;
     private JComponent xComp, yComp, widthComp, heightComp, kComp, mComp;
-    private ArrayList<BufferedImage> displayImages;
+    private ArrayList<BufferedImage> displayImages, originalImages;
     private int currentIndex;
+    private boolean hasTemplate = false, hasImages = false;
+    private final int size = 720;
+    private CSVIO csvReader;
 
     private ViewPanel inputPanel;
     private ViewPanel outputPanel;
-    
+
     public ImageView() {
-        layer = new Layer(200, 200);
+        layer = new Layer(size, size);
         //layer = new Layer(200, 200);
-        BufferedImage  img = null;
-        try {
-            img = ImageIO.read(new File("template.jpg"));
-        } catch (IOException ex) {
-            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        layer.addTemplate(img);
-        
-        
         displayImages = new ArrayList<>();
+        originalImages = new ArrayList<>();
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
@@ -80,7 +76,6 @@ public class ImageView extends javax.swing.JFrame {
         FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("CSV file", "csv");
         jfc.addChoosableFileFilter(jpgFilter);
         jfc.addChoosableFileFilter(csvFilter);
-        jfc.setMultiSelectionEnabled(true);
 
         xComp = cropXSpinner.getEditor();
         xTextField = (JFormattedTextField) xComp.getComponent(0);
@@ -111,16 +106,16 @@ public class ImageView extends javax.swing.JFrame {
         kTextField = (JFormattedTextField) kComp.getComponent(0);
         DefaultFormatter kFormatter = (DefaultFormatter) kTextField.getFormatter();
         kFormatter.setCommitsOnValidEdit(true);
-        
+
         inputPanel = new ViewPanel("Input Images");
         outputPanel = new ViewPanel("Output Images");
-        
+
         inputPanel.setBounds(0, 0, inputPanel.getPreferredSize().width, inputPanel.getPreferredSize().height);
         outputPanel.setBounds(this.getBounds().x + this.getPreferredSize().width, 0, inputPanel.getPreferredSize().width, inputPanel.getPreferredSize().height);
-        
+
         inputPanel.setObserver(this);
         outputPanel.setObserver(this);
-        
+
         inputPanel.setVisible(true);
         outputPanel.setVisible(true);
     }
@@ -169,10 +164,13 @@ public class ImageView extends javax.swing.JFrame {
         convolveKLabel = new javax.swing.JLabel();
         convolveMSpinner = new javax.swing.JSpinner();
         convolveMLabel = new javax.swing.JLabel();
+        templateBtn = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         saveImageBtn = new javax.swing.JButton();
         nextBtn = new javax.swing.JButton();
         previousBtn = new javax.swing.JButton();
+        templateLabel = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Image Manipulation App");
@@ -396,6 +394,16 @@ public class ImageView extends javax.swing.JFrame {
         convolveMLabel.setText("m");
         convolveMLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
+        templateBtn.setBackground(new java.awt.Color(236, 236, 245));
+        templateBtn.setFont(new java.awt.Font("Century Gothic", 0, 11)); // NOI18N
+        templateBtn.setText("Insert Template");
+        templateBtn.setFocusable(false);
+        templateBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                templateBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout actionPanelLayout = new javax.swing.GroupLayout(actionPanel);
         actionPanel.setLayout(actionPanelLayout);
         actionPanelLayout.setHorizontalGroup(
@@ -480,13 +488,18 @@ public class ImageView extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(convolveMSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(actionPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(templateBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         actionPanelLayout.setVerticalGroup(
             actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(actionPanelLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
                 .addComponent(loadImageBtn)
-                .addGap(15, 15, 15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(templateBtn)
+                .addGap(21, 21, 21)
                 .addComponent(rotateLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(actionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -587,28 +600,40 @@ public class ImageView extends javax.swing.JFrame {
             }
         });
 
+        templateLabel.setBackground(new java.awt.Color(244, 244, 244));
+        templateLabel.setOpaque(true);
+
+        jLabel1.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        jLabel1.setText("Loaded Template:");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(previousBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(223, 223, 223)
-                .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                .addGap(223, 223, 223)
-                .addComponent(nextBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(previousBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(123, 123, 123)
+                .addComponent(saveImageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(57, 57, 57)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(templateLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46)
+                .addComponent(nextBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(saveImageBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(nextBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(previousBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(5, 5, 5))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(saveImageBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel1))
+                    .addComponent(nextBtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(templateLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(previousBtn, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -617,10 +642,11 @@ public class ImageView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 756, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 776, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, 0)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 770, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 0, 0))
         );
         layout.setVerticalGroup(
@@ -629,72 +655,35 @@ public class ImageView extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+                .addComponent(imagePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void loadImageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadImageBtnActionPerformed
-        loadImage();
-        if (layer != null) {
+        boolean hasLoaded = loadImage();
+        if (hasLoaded) {
             currentIndex = 0;
             displayImage = displayImages.get(0);
 
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
 
-            saveImageBtn.setEnabled(true);
-            rotateClockwiseBtn.setEnabled(true);
-            rotateCounterClockwiseBtn.setEnabled(true);
-            cropXSpinner.setEnabled(true);
-            cropYSpinner.setEnabled(true);
-            cropWidthSpinner.setEnabled(true);
-            cropHeightSpinner.setEnabled(true);
-            cropImageBtn.setEnabled(true);
-            zoomBtn.setEnabled(true);
-            zoomCombo.setEnabled(true);
-            reverseBtn.setEnabled(true);
-            noiseSlider.setEnabled(true);
-            noiseBtn.setEnabled(true);
-            brightenSlider.setEnabled(true);
-            brightenBtn.setEnabled(true);
-            darkenSlider.setEnabled(true);
-            darkenBtn.setEnabled(true);
-            convolveKSpinner.setEnabled(true);
-            convolveMSpinner.setEnabled(true);
-            peelBtn.setEnabled(true);
-            previousBtn.setEnabled(true);
-            nextBtn.setEnabled(true);
-
-            SpinnerNumberModel xCrop = (SpinnerNumberModel) cropXSpinner.getModel();
-            xCrop.setMaximum(displayImage.getWidth());
-
-            SpinnerNumberModel yCrop = (SpinnerNumberModel) cropYSpinner.getModel();
-            yCrop.setMaximum(displayImage.getHeight());
-
-            SpinnerNumberModel widthCrop = (SpinnerNumberModel) cropWidthSpinner.getModel();
-            widthCrop.setMaximum(displayImage.getWidth());
-
-            SpinnerNumberModel heightCrop = (SpinnerNumberModel) cropHeightSpinner.getModel();
-            heightCrop.setMaximum(displayImage.getHeight());
-
-            SpinnerNumberModel kModel = (SpinnerNumberModel) convolveKSpinner.getModel();
-            kModel.setMaximum(layer.getPileSize());
-
-            SpinnerNumberModel mModel = (SpinnerNumberModel) convolveMSpinner.getModel();
-            mModel.setMaximum(displayImage.getHeight());
+            hasImages = true;
+            if (hasImages && hasTemplate) {
+                enableGUI();
+            }
         }
     }//GEN-LAST:event_loadImageBtnActionPerformed
 
     private void rotateClockwiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rotateClockwiseBtnActionPerformed
         displayImage = rotateClockwise();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_rotateClockwiseBtnActionPerformed
 
     private void rotateCounterClockwiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rotateCounterClockwiseBtnActionPerformed
         displayImage = rotateCounterClockwise();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_rotateCounterClockwiseBtnActionPerformed
 
     private void cropImageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cropImageBtnActionPerformed
@@ -703,13 +692,13 @@ public class ImageView extends javax.swing.JFrame {
 
         if (cropWidth != 0 && cropHeight != 0) {
             displayImage = cropImage(cropWidth, cropHeight);
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_cropImageBtnActionPerformed
 
     private void reverseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reverseBtnActionPerformed
         displayImage = reverseColor();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_reverseBtnActionPerformed
 
     private void noiseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_noiseBtnActionPerformed
@@ -740,17 +729,17 @@ public class ImageView extends javax.swing.JFrame {
             }
             displayImage.setRGB(x, y, noiseColor.getRGB());
         }
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_noiseBtnActionPerformed
 
     private void brightenBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_brightenBtnActionPerformed
         displayImage = brightenImage();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_brightenBtnActionPerformed
 
     private void darkenBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_darkenBtnActionPerformed
         displayImage = darkenImage();
-        imageLabel.setIcon(new ImageIcon(displayImage));
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
     }//GEN-LAST:event_darkenBtnActionPerformed
 
     private void zoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomBtnActionPerformed
@@ -786,7 +775,10 @@ public class ImageView extends javax.swing.JFrame {
         int k = (Integer) convolveKSpinner.getValue();
         int m = (Integer) convolveMSpinner.getValue();
         int ctr = 1;
+        
         displayImages.clear();
+        //restorePile();
+        
         if (k != 0 && m != 0) {
             displayImages = layer.extract(k, m);
             currentIndex = 0;
@@ -795,7 +787,7 @@ public class ImageView extends javax.swing.JFrame {
             }
 
             displayImage = displayImages.get(0);
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
 
             try {
                 for (BufferedImage img : displayImages) {
@@ -805,6 +797,8 @@ public class ImageView extends javax.swing.JFrame {
 
                     ctr++;
                 }
+                
+                restorePile();
             } catch (IOException ex) {
                 Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -815,7 +809,7 @@ public class ImageView extends javax.swing.JFrame {
         if (currentIndex > 0) {
             displayImage = displayImages.get(currentIndex - 1);
             currentIndex--;
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_previousBtnActionPerformed
 
@@ -823,13 +817,64 @@ public class ImageView extends javax.swing.JFrame {
         if (currentIndex < displayImages.size() - 1) {
             displayImage = displayImages.get(currentIndex + 1);
             currentIndex++;
-            imageLabel.setIcon(new ImageIcon(displayImage));
+            imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
         }
     }//GEN-LAST:event_nextBtnActionPerformed
 
-    public void loadImage() {
-        
+    private void templateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_templateBtnActionPerformed
+        BufferedImage template = null;
+        int[][] matrix;
+
+        jfc.setMultiSelectionEnabled(false);
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            if (jfc.getSelectedFile().getPath().substring(jfc.getSelectedFile().getPath().indexOf("."), jfc.getSelectedFile().getPath().length() - 1).equals("csv")) {
+                ArrayList<String> pixels = csvReader.read(jfc.getSelectedFile().getPath());
+                int size = pixels.size();
+                matrix = new int[size][size];
+                int i = 0;
+                for (String s : pixels) {
+                    String[] toPix = s.split(",");
+                    for (int j = 0; j < matrix.length; j++) {
+                        matrix[i][j] = Integer.parseInt(toPix[j]);
+                    }
+                    i++;
+                }
+
+                template = toImage(matrix);
+
+                layer.addTemplate(template);
+
+                templateLabel.setIcon(new ImageIcon(template.getScaledInstance(templateLabel.getWidth(), templateLabel.getHeight(), BufferedImage.SCALE_SMOOTH)));
+                hasTemplate = true;
+                if (hasTemplate && hasImages) {
+                    enableGUI();
+                }
+            } else {
+                File templateFile = jfc.getSelectedFile();
+
+                if (templateFile != null) {
+                    try {
+                        template = ImageIO.read(templateFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    layer.addTemplate(template);
+
+                    templateLabel.setIcon(new ImageIcon(template.getScaledInstance(templateLabel.getWidth(), templateLabel.getHeight(), BufferedImage.SCALE_SMOOTH)));
+                    hasTemplate = true;
+                    if (hasTemplate && hasImages) {
+                        enableGUI();
+                    }
+                }
+            }
+        }
+    }//GEN-LAST:event_templateBtnActionPerformed
+
+    public boolean loadImage() {
         BufferedImage image;
+        boolean hasLoaded = false;
+        jfc.setMultiSelectionEnabled(true);
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
             File[] imgFiles = jfc.getSelectedFiles();
@@ -843,13 +888,17 @@ public class ImageView extends javax.swing.JFrame {
                         layer.addImage(image);
                         inputPanel.addImage(image);
                         displayImages.add(image);
+                        originalImages.add(image);
                     } catch (IOException ex) {
                         Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                 }
             }
+            hasLoaded = true;
         }
+
+        return hasLoaded;
     }
 
     public BufferedImage rotateClockwise() {
@@ -901,7 +950,8 @@ public class ImageView extends javax.swing.JFrame {
                 break;
         }
         ArrayList<Color> colorList = new ArrayList<>();
-        BufferedImage zoomedImage = new BufferedImage(image.getWidth() / zoomTimes, image.getHeight() / zoomTimes, BufferedImage.TYPE_INT_RGB);
+        BufferedImage zoomedImage = new BufferedImage((int) Math.floor(image.getWidth() / zoomTimes), (int) Math.floor(image.getHeight() / zoomTimes), BufferedImage.TYPE_INT_RGB);
+        System.out.println("size! " + zoomedImage.getWidth() + " x " + zoomedImage.getHeight());
         Color zoomedColor;
 
         int zoomX = 0;
@@ -931,7 +981,10 @@ public class ImageView extends javax.swing.JFrame {
 
                     //put in zoomed image
                     zoomedColor = new Color(aveRed, aveGreen, aveBlue);
-                    zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
+                    // System.out.println("vs " + zoomX + " x " + zoomY);
+                    if (zoomX < zoomedImage.getWidth() && zoomY < zoomedImage.getHeight()) {
+                        zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
+                    }
                     zoomX++;
                     if (zoomX > zoomedImage.getWidth() - 1) {
                         zoomX = 0;
@@ -1004,11 +1057,82 @@ public class ImageView extends javax.swing.JFrame {
             Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void updateCurrentImage(BufferedImage image){
-        imageLabel.setIcon(new ImageIcon(image));
+
+    public void updateCurrentImage(BufferedImage image, int index) {
+        displayImage = image;
+        currentIndex = index;
+        imageLabel.setIcon(new ImageIcon(displayImage.getScaledInstance(size, size, BufferedImage.SCALE_SMOOTH)));
+    }
+
+    public void enableGUI() {
+        saveImageBtn.setEnabled(true);
+        rotateClockwiseBtn.setEnabled(true);
+        rotateCounterClockwiseBtn.setEnabled(true);
+        cropXSpinner.setEnabled(true);
+        cropYSpinner.setEnabled(true);
+        cropWidthSpinner.setEnabled(true);
+        cropHeightSpinner.setEnabled(true);
+        cropImageBtn.setEnabled(true);
+        zoomBtn.setEnabled(true);
+        zoomCombo.setEnabled(true);
+        reverseBtn.setEnabled(true);
+        noiseSlider.setEnabled(true);
+        noiseBtn.setEnabled(true);
+        brightenSlider.setEnabled(true);
+        brightenBtn.setEnabled(true);
+        darkenSlider.setEnabled(true);
+        darkenBtn.setEnabled(true);
+        convolveKSpinner.setEnabled(true);
+        convolveMSpinner.setEnabled(true);
+        peelBtn.setEnabled(true);
+        previousBtn.setEnabled(true);
+        nextBtn.setEnabled(true);
+
+        SpinnerNumberModel xCrop = (SpinnerNumberModel) cropXSpinner.getModel();
+        xCrop.setMaximum(displayImage.getWidth());
+
+        SpinnerNumberModel yCrop = (SpinnerNumberModel) cropYSpinner.getModel();
+        yCrop.setMaximum(displayImage.getHeight());
+
+        SpinnerNumberModel widthCrop = (SpinnerNumberModel) cropWidthSpinner.getModel();
+        widthCrop.setMaximum(displayImage.getWidth());
+
+        SpinnerNumberModel heightCrop = (SpinnerNumberModel) cropHeightSpinner.getModel();
+        heightCrop.setMaximum(displayImage.getHeight());
+
+        SpinnerNumberModel kModel = (SpinnerNumberModel) convolveKSpinner.getModel();
+        kModel.setMaximum(layer.getPileSize());
+
+        SpinnerNumberModel mModel = (SpinnerNumberModel) convolveMSpinner.getModel();
+        mModel.setMaximum(displayImage.getHeight());
+    }
+
+    public BufferedImage toImage(int matrix[][]) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int nPixelCount = rows * cols;
+        BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = 0; i < nPixelCount; i++) {
+            int row = i / cols;
+            int col = i % cols;
+
+            Color c = new Color(matrix[row][col], matrix[row][col], matrix[row][col]);
+
+            image.setRGB(col, row, c.getRGB());
+        }
+
+        return image;
     }
     
+    public void restorePile(){
+        layer.restart();
+        for(BufferedImage img: originalImages){
+       //     displayImages.add(img);
+            layer.addImage(img);
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel actionPanel;
     private javax.swing.JLabel alterLabel;
@@ -1032,6 +1156,7 @@ public class ImageView extends javax.swing.JFrame {
     private javax.swing.JSlider darkenSlider;
     private javax.swing.JLabel imageLabel;
     private javax.swing.JScrollPane imagePanel;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton loadImageBtn;
@@ -1046,6 +1171,8 @@ public class ImageView extends javax.swing.JFrame {
     private javax.swing.JButton rotateCounterClockwiseBtn;
     private javax.swing.JLabel rotateLabel;
     private javax.swing.JButton saveImageBtn;
+    private javax.swing.JButton templateBtn;
+    private javax.swing.JLabel templateLabel;
     private javax.swing.JButton zoomBtn;
     private javax.swing.JComboBox zoomCombo;
     private javax.swing.JLabel zoomLabel;
