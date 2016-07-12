@@ -77,13 +77,14 @@ public class ViewPanel extends javax.swing.JFrame {
         int len = labels.size();
         
         for(int i = 0; i < len; i++){
+            int index = i;
             JLabel label = labels.get(i);
             BufferedImage image = images.get(i);
             label.addMouseListener(new MouseListener(){
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    observer.updateCurrentImage(image);
+                    observer.updateCurrentImage(image, index);
                 }
 
                 @Override
