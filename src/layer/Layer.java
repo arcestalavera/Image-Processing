@@ -129,6 +129,7 @@ public class Layer {
     }
 
     public void addTemplate(BufferedImage image) {
+        template = image;
 
         int w = image.getWidth();
         int h = image.getHeight();
