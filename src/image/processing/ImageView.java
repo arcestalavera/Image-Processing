@@ -6,6 +6,7 @@
 package image.processing;
 
 import GUI.Gui;
+import csvIO.CSVIO;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -45,6 +46,7 @@ public class ImageView extends javax.swing.JFrame {
     private int currentIndex;
     private boolean hasTemplate = false, hasImages = false;
     private final int size = 720;
+    private CSVIO csvReader;
 
     private ViewPanel inputPanel;
     private ViewPanel outputPanel;
@@ -815,24 +817,49 @@ public class ImageView extends javax.swing.JFrame {
 
     private void templateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_templateBtnActionPerformed
         BufferedImage template = null;
+        int[][] matrix;
 
         jfc.setMultiSelectionEnabled(false);
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
-            File templateFile = jfc.getSelectedFile();
-
-            if (templateFile != null) {
-                try {
-                    template = ImageIO.read(templateFile);
-                } catch (IOException ex) {
-                    Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+            if (jfc.getSelectedFile().getPath().substring(jfc.getSelectedFile().getPath().indexOf("."), jfc.getSelectedFile().getPath().length() - 1).equals("csv")) {
+                ArrayList<String> pixels = csvReader.read(jfc.getSelectedFile().getPath());
+                int size = pixels.size();
+                matrix = new int[size][size];
+                int i = 0;
+                for (String s : pixels) {
+                    String[] toPix = s.split(",");
+                    for (int j = 0; j < matrix.length; j++) {
+                        matrix[i][j] = Integer.parseInt(toPix[j]);
+                    }
+                    i++;
                 }
+
+                template = toImage(matrix);
+
                 layer.addTemplate(template);
 
                 templateLabel.setIcon(new ImageIcon(template.getScaledInstance(templateLabel.getWidth(), templateLabel.getHeight(), BufferedImage.SCALE_SMOOTH)));
                 hasTemplate = true;
                 if (hasTemplate && hasImages) {
                     enableGUI();
+                }
+            } else {
+                File templateFile = jfc.getSelectedFile();
+
+                if (templateFile != null) {
+                    try {
+                        template = ImageIO.read(templateFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    layer.addTemplate(template);
+
+                    templateLabel.setIcon(new ImageIcon(template.getScaledInstance(templateLabel.getWidth(), templateLabel.getHeight(), BufferedImage.SCALE_SMOOTH)));
+                    hasTemplate = true;
+                    if (hasTemplate && hasImages) {
+                        enableGUI();
+                    }
                 }
             }
         }
@@ -947,7 +974,7 @@ public class ImageView extends javax.swing.JFrame {
 
                     //put in zoomed image
                     zoomedColor = new Color(aveRed, aveGreen, aveBlue);
-                   // System.out.println("vs " + zoomX + " x " + zoomY);
+                    // System.out.println("vs " + zoomX + " x " + zoomY);
                     if (zoomX < zoomedImage.getWidth() && zoomY < zoomedImage.getHeight()) {
                         zoomedImage.setRGB(zoomY, zoomX, zoomedColor.getRGB());
                     }
@@ -1071,6 +1098,24 @@ public class ImageView extends javax.swing.JFrame {
 
         SpinnerNumberModel mModel = (SpinnerNumberModel) convolveMSpinner.getModel();
         mModel.setMaximum(displayImage.getHeight());
+    }
+
+    public BufferedImage toImage(int matrix[][]) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int nPixelCount = rows * cols;
+        BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = 0; i < nPixelCount; i++) {
+            int row = i / cols;
+            int col = i % cols;
+
+            Color c = new Color(matrix[row][col], matrix[row][col], matrix[row][col]);
+
+            image.setRGB(col, row, c.getRGB());
+        }
+
+        return image;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
