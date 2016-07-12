@@ -1,0 +1,17 @@
+public BufferedImage toImage(int matrix[][]){
+	int rows = matrix.length;
+	int cols = matrix[0].length;
+	int nPixelCount = rows * cols;
+	BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+	
+	for(int i = 0; i < nPixelCount; i++){
+		int row = i / cols;
+		int col = i % cols;
+		
+		Color c = new Color(matrix[row][col], matrix[row][col], matrix[row][col]);
+		
+		image.setRGB(col, row, c.getRGB());
+	}
+		
+	return image;
+}
