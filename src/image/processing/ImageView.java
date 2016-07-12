@@ -775,6 +775,7 @@ public class ImageView extends javax.swing.JFrame {
         int m = (Integer) convolveMSpinner.getValue();
         int ctr = 1;
         displayImages.clear();
+        layer.restart();
         if (k != 0 && m != 0) {
             displayImages = layer.extract(k, m);
             currentIndex = 0;

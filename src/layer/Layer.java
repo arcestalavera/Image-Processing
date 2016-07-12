@@ -16,12 +16,25 @@ import java.util.ArrayList;
 public class Layer {
 
     public Pipe[][] pipes;
+    private int width, height;
 
     public BufferedImage template = null;
 
     public Layer(int width, int height) {
         pipes = new Pipe[width][height];
+        this.width = width;
+        this.height = height;
 
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                pipes[y][x] = new Pipe();
+            }
+        }
+
+    }
+
+    public void restart() {
+        pipes = new Pipe[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 pipes[y][x] = new Pipe();
@@ -105,12 +118,13 @@ public class Layer {
                 //System.out.println("x,y: " + i + ", " + j);
                 int pixel = image.getRGB(i, j);
                 c = new Color(pixel);
-                if((c.getRed() + c.getBlue() + c.getGreen())/3 >127){
+                if ((c.getRed() + c.getBlue() + c.getGreen()) / 3 > 127) {
                     pipes[j][i].setMode(true);
-                }else pipes[j][i].setMode(false);
-                
-                //imagePixels[i][j] = pixel;
+                } else {
+                    pipes[j][i].setMode(false);
+                }
 
+                //imagePixels[i][j] = pixel;
             }
         }
 
