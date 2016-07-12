@@ -42,7 +42,7 @@ public class ImageView extends javax.swing.JFrame {
     private JFileChooser jfc;
     private JFormattedTextField xTextField, yTextField, widthTextField, heightTextField, kTextField, mTextField;
     private JComponent xComp, yComp, widthComp, heightComp, kComp, mComp;
-    private ArrayList<BufferedImage> displayImages;
+    private ArrayList<BufferedImage> displayImages, originalImages;
     private int currentIndex;
     private boolean hasTemplate = false, hasImages = false;
     private final int size = 720;
@@ -55,6 +55,7 @@ public class ImageView extends javax.swing.JFrame {
         layer = new Layer(size, size);
         //layer = new Layer(200, 200);
         displayImages = new ArrayList<>();
+        originalImages = new ArrayList<>();
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
@@ -774,8 +775,10 @@ public class ImageView extends javax.swing.JFrame {
         int k = (Integer) convolveKSpinner.getValue();
         int m = (Integer) convolveMSpinner.getValue();
         int ctr = 1;
+        
         displayImages.clear();
-        layer.restart();
+        //restorePile();
+        
         if (k != 0 && m != 0) {
             displayImages = layer.extract(k, m);
             currentIndex = 0;
@@ -794,6 +797,8 @@ public class ImageView extends javax.swing.JFrame {
 
                     ctr++;
                 }
+                
+                restorePile();
             } catch (IOException ex) {
                 Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -883,6 +888,7 @@ public class ImageView extends javax.swing.JFrame {
                         layer.addImage(image);
                         inputPanel.addImage(image);
                         displayImages.add(image);
+                        originalImages.add(image);
                     } catch (IOException ex) {
                         Logger.getLogger(ImageView.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -1117,6 +1123,14 @@ public class ImageView extends javax.swing.JFrame {
         }
 
         return image;
+    }
+    
+    public void restorePile(){
+        layer.restart();
+        for(BufferedImage img: originalImages){
+       //     displayImages.add(img);
+            layer.addImage(img);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
