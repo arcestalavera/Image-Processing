@@ -743,7 +743,7 @@ public class ImageView extends javax.swing.JFrame {
     }//GEN-LAST:event_darkenBtnActionPerformed
 
     private void zoomBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zoomBtnActionPerformed
-        displayImage = zoomImage(displayImage, "zoom");
+        displayImage = zoomImage(displayImage, "zoom", currentIndex);
         imageLabel.setIcon(new ImageIcon(new ImageIcon(displayImage).getImage().getScaledInstance(720, 720, Image.SCALE_SMOOTH)));
     }//GEN-LAST:event_zoomBtnActionPerformed
 
@@ -783,7 +783,7 @@ public class ImageView extends javax.swing.JFrame {
             displayImages = layer.extract(k, m);
             currentIndex = 0;
             for (int i = 0; i < displayImages.size(); i++) {
-                displayImages.set(i, zoomImage(displayImages.get(i), "convolve"));
+                displayImages.set(i, zoomImage(displayImages.get(i), "convolve", i));
             }
 
             displayImage = displayImages.get(0);
@@ -939,7 +939,7 @@ public class ImageView extends javax.swing.JFrame {
         return reverseImage;
     }
 
-    public BufferedImage zoomImage(BufferedImage image, String caller) {
+    public BufferedImage zoomImage(BufferedImage image, String caller, int index) {
         int zoomTimes = 1;
         switch (caller) {
             case ("zoom"):
@@ -996,7 +996,7 @@ public class ImageView extends javax.swing.JFrame {
                 }
             }
         }
-        displayImages.set(currentIndex, zoomedImage);
+        displayImages.set(index, zoomedImage);
         return zoomedImage;
     }
 
